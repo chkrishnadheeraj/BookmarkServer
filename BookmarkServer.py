@@ -40,9 +40,11 @@
 # starter code.
 #
 # After writing each step, restart the server and run test.py to test it.
-
+import threading
+from socketserver import ThreadingMixIn
 import http.server
 import requests
+import os
 from urllib.parse import unquote, parse_qs
 
 memory = {}
@@ -65,6 +67,9 @@ form = '''<!DOCTYPE html>
 {}
 </pre>
 '''
+
+class ThreadHTTPServer(ThreadingMixIn,http.server.HTTPServer):
+    "This is a HTTP server that supports concurrency"
 
 
 def CheckURI(uri, timeout=5):
@@ -155,6 +160,7 @@ class Shortener(http.server.BaseHTTPRequestHandler):
             #raise NotImplementedError("Step 5 isn't written yet!")
 
 if __name__ == '__main__':
-    server_address = ('', 8000)
-    httpd = http.server.HTTPServer(server_address, Shortener)
+    port = int(os.environ('PORT',8000))
+    server_address = ('', port)
+    httpd = ThreadHTTPServer(server_address, Shortener)
     httpd.serve_forever()
